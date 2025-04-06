@@ -1,18 +1,20 @@
-export const v = (s) => (d) => {
-    const e = [];
-    for (const f in s) {
-        const r = s[f], v = d[f];
-        for (const fn of r) {
-            const m = fn(v, f);
-            if (m) {
-                e.push({ field: f, message: m });
-                break;
+export const v = (s) => {
+    return (d) => {
+        const e = [];
+        for (const f in s) {
+            const r = s[f], v = d[f];
+            for (const fn of r) {
+                const m = fn(v, f);
+                if (m) {
+                    e.push({ field: f, message: m });
+                    break;
+                }
             }
         }
-    }
-    return e.length
-        ? { valid: false, errors: e, data: undefined }
-        : { valid: true, data: d, errors: undefined };
+        return e.length
+            ? { valid: false, errors: e, data: undefined }
+            : { valid: true, data: d, errors: undefined };
+    };
 };
 export const req = (...r) => [
     (v, f) => v === undefined || v === null || v === "" ? `${f} is required` : void 0,

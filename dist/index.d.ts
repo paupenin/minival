@@ -14,7 +14,15 @@ export type V = {
     errors: E[];
     data: undefined;
 };
-export declare const v: (s: S) => (d: Record<string, unknown>) => V;
+export declare const v: <T extends Record<string, unknown>>(s: S) => (d: T) => {
+    valid: true;
+    data: T;
+    errors: undefined;
+} | {
+    valid: false;
+    data: undefined;
+    errors: E[];
+};
 export declare const req: (...r: R[]) => L;
 export declare const opt: (...r: R[]) => L;
 export declare const str: () => R;

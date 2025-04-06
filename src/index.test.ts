@@ -38,6 +38,27 @@ describe("minival", () => {
         errors: undefined,
       });
     });
+
+    it("type inference", () => {
+      const schema = v<{
+        name: string;
+        nickname?: string;
+      }>({
+        name: req(str()),
+        nickname: opt(str()),
+      });
+      const result = schema({ name: "John" });
+
+      if (!result.valid) {
+        throw new Error("Invalid");
+      }
+
+      // All the following should be correctly typed
+      expect(result.data).toBeTypeOf("object");
+      expect(result.data.name).toBeTypeOf("string");
+      expect(result.data.nickname).toBeUndefined();
+      expect(result.data.name.length).toBe(4);
+    });
   });
 
   describe("opt", () => {
@@ -280,6 +301,43 @@ describe("minival", () => {
       expect(schema({ promo: "B" })).toEqual({
         valid: true,
         data: { promo: "B" },
+        errors: undefined,
+      });
+    });
+  });
+
+  describe("custom rule", () => {
+    it("validates custom rule", () => {
+      const isEven = () => (val, field) => {
+        return typeof val !== "number" || val % 2 !== 0
+          ? `${field} must be an even number`
+          : undefined;
+      };
+
+      const schema = v({ luckyNumber: req(isEven()) });
+      expect(schema({ luckyNumber: "3" })).toEqual({
+        valid: false,
+        errors: [
+          {
+            field: "luckyNumber",
+            message: "luckyNumber must be an even number",
+          },
+        ],
+        data: undefined,
+      });
+      expect(schema({ luckyNumber: 3 })).toEqual({
+        valid: false,
+        errors: [
+          {
+            field: "luckyNumber",
+            message: "luckyNumber must be an even number",
+          },
+        ],
+        data: undefined,
+      });
+      expect(schema({ luckyNumber: 8 })).toEqual({
+        valid: true,
+        data: { luckyNumber: 8 },
         errors: undefined,
       });
     });

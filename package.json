@@ -32,10 +32,13 @@
   },
   "homepage": "https://github.com/paupenin/minival#readme",
   "scripts": {
-    "build": "tsc",
-    "test": "vitest run --coverage",
     "dev": "vitest",
-    "lint": "eslint src --fix"
+    "test": "vitest run --coverage",
+    "prep": "npm run lint && npm run build && npm run gzip && npm run brotli && ls -lh dist",
+    "lint": "eslint src --fix",
+    "build": "tsc",
+    "gzip": "gzip -kf dist/index.js",
+    "brotli": "brotli -f dist/index.js -o dist/index.js.br"
   },
   "devDependencies": {
     "@eslint/js": "^9.24.0",

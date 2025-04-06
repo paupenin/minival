@@ -6,10 +6,22 @@ export type V =
   | { valid: true; data: Record<string, unknown>; errors: undefined }
   | { valid: false; errors: E[]; data: undefined };
 
-export const v =
-  (s: S) =>
-  (d: Record<string, unknown>): V => {
+export const v = <T extends Record<string, unknown>>(s: S) => {
+  return (
+    d: T,
+  ):
+    | {
+        valid: true;
+        data: T;
+        errors: undefined;
+      }
+    | {
+        valid: false;
+        data: undefined;
+        errors: E[];
+      } => {
     const e: E[] = [];
+
     for (const f in s) {
       const r = s[f],
         v = d[f];
@@ -21,10 +33,12 @@ export const v =
         }
       }
     }
+
     return e.length
       ? { valid: false, errors: e, data: undefined }
       : { valid: true, data: d, errors: undefined };
   };
+};
 
 export const req = (...r: R[]): L => [
   (v, f) =>
