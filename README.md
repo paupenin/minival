@@ -3,11 +3,11 @@
 ![license](https://img.shields.io/npm/l/minival)
 ![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
 
-> Minimal, fast, and function-based validation library for JavaScript & TypeScript.
+> Minimal, fast, and function-based validation library for JavaScript & TypeScript.\
 > Ideal for small apps, edge runtimes, and constrained environments like AWS AppSync.
 
-- 🪶 **Tiny and fast** — 595 bytes Brotli, 674 bytes gzip (2.3 KB raw), zero dependencies
-- 🌲 **Tree-shaking** — Only include what you use
+- 🪶 **Tiny and fast** — 595 bytes Brotli, 674 bytes gzip, 2.3 KB raw (all features)
+- 🌲 **Tree-shaking** — Only include what you use, zero dependencies
 - 🧠 **Function-first** — Compose rules with plain functions, no decorators or classes
 - 🔁 **Composable** — Build custom rules with `and()`, `or()`, `opt()`, `req()`
 - 🧾 **Typed schemas** — Full TypeScript support with optional generics
@@ -100,9 +100,9 @@ const schema = v({
     str(),
     min(8),
     max(128),
-    rgx(/[a-z]/),  // lowercase
-    rgx(/[A-Z]/),  // uppercase
-    rgx(/[0-9]/)   // number
+    rgx(/[a-z]/),  // contains lowercase
+    rgx(/[A-Z]/),  // contains uppercase
+    rgx(/[0-9]/)   // contains number
   ),
   age: opt(num(), min(18)),
   role: req(or(eq("admin"), eq("user")))
@@ -115,12 +115,12 @@ const input = {
   role: "admin"
 };
 
-const result = schema(input);
+const { valid, errors, data } = schema(input);
 
-if (!result.valid) {
-  console.error(result.errors);
+if (!valid) {
+  console.error(errors);
 } else {
-  console.log("Validated data:", result.data);
+  console.log("Validated data:", data);
 }
 ```
 
@@ -197,14 +197,16 @@ v({ promo: req(or(eq("A"), eq("B"))) })({ promo: "C" }); // ❌ "promo is invali
 
 ## 🧩 Custom Rule Example
 
+Create your custom validation rules:
+
 ```ts
 import { v, req } from 'minival';
 
 // Define a custom rule function
 const isEven = () => (val, field) => {
-  return typeof val !== 'number' || val % 2 !== 0
-    ? `${field} must be an even number`
-    : undefined;
+  if (typeof val !== 'number' || val % 2 !== 0) {
+    return `${field} must be an even number`;
+  }
 };
 
 const schema = v({
@@ -269,11 +271,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for release notes.
 
 ## 🧪 Test Coverage
 
-> ✅ **100% test coverage** powered by [Vitest](https://vitest.dev)
-
-```bash
-npm run test
-```
+> **100% test coverage** powered by [Vitest](https://vitest.dev)
 
 ---
 
