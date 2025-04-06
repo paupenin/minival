@@ -5,15 +5,6 @@ export type E = {
     field: string;
     message: string;
 };
-export type V = {
-    valid: true;
-    data: Record<string, unknown>;
-    errors: undefined;
-} | {
-    valid: false;
-    errors: E[];
-    data: undefined;
-};
 export declare const v: <T extends Record<string, unknown>>(s: S) => (d: T) => {
     valid: true;
     data: T;
@@ -25,14 +16,16 @@ export declare const v: <T extends Record<string, unknown>>(s: S) => (d: T) => {
 };
 export declare const req: (...r: R[]) => L;
 export declare const opt: (...r: R[]) => L;
-export declare const str: () => R;
-export declare const num: () => R;
-export declare const bool: () => R;
-export declare const min: (n: number) => R;
-export declare const max: (n: number) => R;
-export declare const eq: (x: unknown) => R;
-export declare const ne: (x: unknown) => R;
-export declare const rgx: (r: RegExp) => R;
-export declare const email: () => R;
+type M = string | ((v: unknown) => string);
+export declare const str: (m?: M) => R;
+export declare const num: (m?: M) => R;
+export declare const bool: (m?: M) => R;
+export declare const min: (n: number, m?: M) => R;
+export declare const max: (n: number, m?: M) => R;
+export declare const eq: (x: unknown, m?: M) => R;
+export declare const ne: (x: unknown, m?: M) => R;
+export declare const rgx: (r: RegExp, m?: M) => R;
+export declare const email: (m?: M) => R;
 export declare const and: (...r: R[]) => R;
 export declare const or: (...r: R[]) => R;
+export {};

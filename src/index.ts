@@ -2,9 +2,6 @@ export type R = (v: unknown, f: string) => string | undefined;
 export type L = R[];
 export type S = Record<string, L>;
 export type E = { field: string; message: string };
-export type V =
-  | { valid: true; data: Record<string, unknown>; errors: undefined }
-  | { valid: false; errors: E[]; data: undefined };
 
 export const v = <T extends Record<string, unknown>>(s: S) => {
   return (
@@ -50,52 +47,73 @@ export const opt = (...r: R[]): L => [
   (v, f) => (v === undefined || v === null || v === "" ? void 0 : run(v, f, r)),
 ];
 
-export const str = (): R => (v, f) =>
-  typeof v !== "string" ? `${f} must be a string` : void 0;
+type M = string | ((v: unknown) => string);
 
-export const num = (): R => (v, f) =>
-  typeof v !== "number" ? `${f} must be a number` : void 0;
+const _ = (d: string, v: unknown, m?: M) =>
+  typeof m === "function" ? m(v) : (m ?? d);
 
-export const bool = (): R => (v, f) =>
-  typeof v !== "boolean" ? `${f} must be a boolean` : void 0;
+export const str =
+  (m?: M): R =>
+  (v, f) =>
+    typeof v !== "string" ? _(`${f} must be a string`, v, m) : void 0;
+
+export const num =
+  (m?: M): R =>
+  (v, f) =>
+    typeof v !== "number" ? _(`${f} must be a number`, v, m) : void 0;
+
+export const bool =
+  (m?: M): R =>
+  (v, f) =>
+    typeof v !== "boolean" ? _(`${f} must be a boolean`, v, m) : void 0;
 
 export const min =
-  (n: number): R =>
+  (n: number, m?: M): R =>
   (v, f) => {
     const t = typeof v,
       s = t === "string" ? String(v).length : v;
     if ((t === "string" || t === "number") && Number(s) < n)
-      return `${f} must be at least ${n}${t === "string" ? " characters" : ""}`;
+      return _(
+        `${f} must be at least ${n}${t === "string" ? " characters" : ""}`,
+        v,
+        m,
+      );
   };
 
 export const max =
-  (n: number): R =>
+  (n: number, m?: M): R =>
   (v, f) => {
     const t = typeof v,
       s = t === "string" ? String(v).length : v;
     if ((t === "string" || t === "number") && Number(s) > n)
-      return `${f} must be at most ${n}${t === "string" ? " characters" : ""}`;
+      return _(
+        `${f} must be at most ${n}${t === "string" ? " characters" : ""}`,
+        v,
+        m,
+      );
   };
 
 export const eq =
-  (x: unknown): R =>
+  (x: unknown, m?: M): R =>
   (v, f) =>
-    v !== x ? `${f} is invalid` : void 0;
+    v !== x ? _(`${f} is invalid`, v, m) : void 0;
 
 export const ne =
-  (x: unknown): R =>
+  (x: unknown, m?: M): R =>
   (v, f) =>
-    v === x ? `${f} is invalid` : void 0;
+    v === x ? _(`${f} is invalid`, v, m) : void 0;
 
 export const rgx =
-  (r: RegExp): R =>
+  (r: RegExp, m?: M): R =>
   (v, f) =>
-    typeof v === "string" && !r.test(v) ? `${f} is invalid` : void 0;
+    typeof v === "string" && !r.test(v) ? _(`${f} is invalid`, v, m) : void 0;
 
-export const email = (): R => (v, f) =>
-  typeof v === "string" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
-    ? `${f} must be a valid email`
-    : void 0;
+export const email =
+  (m?: M): R =>
+  (v, f) =>
+    typeof v === "string" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+      ? _(`${f} must be a valid email`, v, m)
+      : void 0;
 
 export const and =
   (...r: R[]): R =>

@@ -23,24 +23,25 @@ export const req = (...r) => [
 export const opt = (...r) => [
     (v, f) => (v === undefined || v === null || v === "" ? void 0 : run(v, f, r)),
 ];
-export const str = () => (v, f) => typeof v !== "string" ? `${f} must be a string` : void 0;
-export const num = () => (v, f) => typeof v !== "number" ? `${f} must be a number` : void 0;
-export const bool = () => (v, f) => typeof v !== "boolean" ? `${f} must be a boolean` : void 0;
-export const min = (n) => (v, f) => {
+const _ = (d, v, m) => typeof m === "function" ? m(v) : (m ?? d);
+export const str = (m) => (v, f) => typeof v !== "string" ? _(`${f} must be a string`, v, m) : void 0;
+export const num = (m) => (v, f) => typeof v !== "number" ? _(`${f} must be a number`, v, m) : void 0;
+export const bool = (m) => (v, f) => typeof v !== "boolean" ? _(`${f} must be a boolean`, v, m) : void 0;
+export const min = (n, m) => (v, f) => {
     const t = typeof v, s = t === "string" ? String(v).length : v;
     if ((t === "string" || t === "number") && Number(s) < n)
-        return `${f} must be at least ${n}${t === "string" ? " characters" : ""}`;
+        return _(`${f} must be at least ${n}${t === "string" ? " characters" : ""}`, v, m);
 };
-export const max = (n) => (v, f) => {
+export const max = (n, m) => (v, f) => {
     const t = typeof v, s = t === "string" ? String(v).length : v;
     if ((t === "string" || t === "number") && Number(s) > n)
-        return `${f} must be at most ${n}${t === "string" ? " characters" : ""}`;
+        return _(`${f} must be at most ${n}${t === "string" ? " characters" : ""}`, v, m);
 };
-export const eq = (x) => (v, f) => v !== x ? `${f} is invalid` : void 0;
-export const ne = (x) => (v, f) => v === x ? `${f} is invalid` : void 0;
-export const rgx = (r) => (v, f) => typeof v === "string" && !r.test(v) ? `${f} is invalid` : void 0;
-export const email = () => (v, f) => typeof v === "string" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
-    ? `${f} must be a valid email`
+export const eq = (x, m) => (v, f) => v !== x ? _(`${f} is invalid`, v, m) : void 0;
+export const ne = (x, m) => (v, f) => v === x ? _(`${f} is invalid`, v, m) : void 0;
+export const rgx = (r, m) => (v, f) => typeof v === "string" && !r.test(v) ? _(`${f} is invalid`, v, m) : void 0;
+export const email = (m) => (v, f) => typeof v === "string" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+    ? _(`${f} must be a valid email`, v, m)
     : void 0;
 export const and = (...r) => (v, f) => {
     for (const c of r) {

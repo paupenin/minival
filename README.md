@@ -6,11 +6,12 @@
 > Minimal, fast, and function-based validation library for JavaScript & TypeScript.\
 > Ideal for small apps, edge runtimes, and constrained environments like AWS AppSync.
 
-- 🪶 **Tiny and fast** — 595 bytes Brotli, 674 bytes gzip, 2.3 KB raw (all features)
+- 🪶 **Tiny and fast** — 635 bytes Brotli, 726 bytes gzip, 2.5 KB raw (all features)
 - 🌲 **Tree-shaking** — Only include what you use, zero dependencies
 - 🧠 **Function-first** — Compose rules with plain functions, no decorators or classes
 - 🔁 **Composable** — Build custom rules with `and()`, `or()`, `opt()`, `req()`
 - 🧾 **Typed schemas** — Full TypeScript support with optional generics
+- 🌐 **Custom messages** — Override default messages or localize per rule
 - 🔍 **Essential validators** — Strings, numbers, booleans, regex, min/max, email, equals, not-equals
 - 💬 **Clear error reporting** — Per-field messages, easy to use with UI libraries
 - 🔌 **React Hook Form compatible** — Drop-in `resolver` integration with RHF
@@ -52,33 +53,35 @@ if (!valid) {
 ### 🔹 Validator
 
 | Function | Description              | Signature                                            |
-|----------|--------------------------|-------------------------------------------------------|
+|----------|--------------------------|------------------------------------------------------|
 | `v()`    | Builds a validator       | `<T>(schema: S) => (data: T) => Result<T>`           |
 
 ### 🔹 Rule Groups
 
-| Function   | Description              | Signature               |
+| Function   | Description              | Signature                |
 |------------|--------------------------|--------------------------|
 | `req()`    | Required field           | `(...rules: R[]) => R[]` |
 | `opt()`    | Optional field           | `(...rules: R[]) => R[]` |
 
 ### 🔹 Validators
 
-| Function   | Description              | Signature                    |
-|------------|--------------------------|-------------------------------|
-| `str()`    | Must be a string         | `() => R`                     |
-| `num()`    | Must be a number         | `() => R`                     |
-| `bool()`   | Must be a boolean        | `() => R`                     |
-| `min(n)`   | Min length or value      | `(n: number) => R`            |
-| `max(n)`   | Max length or value      | `(n: number) => R`            |
-| `email()`  | Must be valid email      | `() => R`                     |
-| `rgx(r)`   | Match regex              | `(regex: RegExp) => R`        |
-| `eq(v)`    | Must equal value         | `(value: any) => R`           |
-| `ne(v)`    | Must not equal value     | `(value: any) => R`           |
+| Function   | Description              | Signature                       |
+|------------|--------------------------|---------------------------------|
+| `str()`    | Must be a string         | `(message?) => R`               |
+| `num()`    | Must be a number         | `(message?) => R`               |
+| `bool()`   | Must be a boolean        | `(message?) => R`               |
+| `email()`  | Must be valid email      | `(message?) => R`               |
+| `min(n)`   | Min length or value      | `(num: number, message?) => R`  |
+| `max(n)`   | Max length or value      | `(num: number, message?) => R`  |
+| `rgx(r)`   | Match regex              | `(regex: RegExp, message?) => R`|
+| `eq(v)`    | Must equal value         | `(value: any, message?) => R`   |
+| `ne(v)`    | Must not equal value     | `(value: any, message?) => R`   |
+
+> `message = string | (value: any) => string | undefined`
 
 ### 🔹 Operators
 
-| Function   | Description              | Signature               |
+| Function   | Description              | Signature                |
 |------------|--------------------------|--------------------------|
 | `and(...)` | All rules must pass      | `(...rules: R[]) => R`   |
 | `or(...)`  | At least one must pass   | `(...rules: R[]) => R`   |
@@ -86,6 +89,35 @@ if (!valid) {
 > `R = (value: any, field: string) => string | undefined`
 
 Missing any feature? Request it by [creating an issue](https://github.com/paupenin/minival/issues).
+
+---
+
+## 🌐 Custom Messages & Localization
+
+Each validator accepts an optional last argument for a custom error message.\
+You can pass either a string or a function for dynamic error messages:
+
+```ts
+str("Name must be a string")
+min(3, (field, value) => `${field} is ${value}, it must be at least 3`)
+```
+
+### Example
+```ts
+const schema = v({
+  username: req(
+    str("Username must be a valid string"),
+    min(3, "Username must be between 3 and 20 characters"),
+    max(20, "Username must be between 3 and 20 characters")
+  )
+});
+
+const { errors } = schema({ username: "ab" });
+console.log(errors);
+// [ { field: 'username', message: 'Username must be between 3 and 20 characters' } ]
+```
+
+This allows flexible messaging and i18n support while keeping the core API small and simple.
 
 ---
 

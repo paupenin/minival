@@ -65,7 +65,11 @@ describe("minival", () => {
     describe("opt", () => {
       it("validates optional fields", () => {
         const schema = v({ nickname: opt(str(), min(3)) });
-        expect(schema({})).toEqual({ valid: true, data: {}, errors: undefined });
+        expect(schema({})).toEqual({
+          valid: true,
+          data: {},
+          errors: undefined,
+        });
         expect(schema({ nickname: "Al" })).toEqual({
           valid: false,
           errors: [
@@ -95,6 +99,22 @@ describe("minival", () => {
           data: undefined,
         });
       });
+
+      it("allows text custom messages", () => {
+        const schema = v({ name: req(str("Nombre erroneo")) });
+        expect(schema({ name: 123 })).toEqual({
+          valid: false,
+          errors: [{ field: "name", message: "Nombre erroneo" }],
+        });
+      });
+
+      it("allows function custom messages", () => {
+        const schema = v({ name: req(str((v) => `Nombre erroneo: ${v}`)) });
+        expect(schema({ name: 123 })).toEqual({
+          valid: false,
+          errors: [{ field: "name", message: "Nombre erroneo: 123" }],
+        });
+      });
     });
 
     describe("num", () => {
@@ -111,6 +131,23 @@ describe("minival", () => {
           data: undefined,
         });
       });
+
+      it("allows text custom messages", () => {
+        const schema = v({ age: req(num("Edad erronea")) });
+        expect(schema({ age: "123" })).toEqual({
+          valid: false,
+          errors: [{ field: "age", message: "Edad erronea" }],
+          data: undefined,
+        });
+      });
+
+      it("allows function custom messages", () => {
+        const schema = v({ age: req(num((v) => `Edad erronea: ${v}`)) });
+        expect(schema({ age: "123" })).toEqual({
+          valid: false,
+          errors: [{ field: "age", message: "Edad erronea: 123" }],
+        });
+      });
     });
 
     describe("bool", () => {
@@ -125,6 +162,22 @@ describe("minival", () => {
           valid: false,
           errors: [{ field: "active", message: "active must be a boolean" }],
           data: undefined,
+        });
+      });
+
+      it("allows text custom messages", () => {
+        const schema = v({ active: req(bool("Activo erroneo")) });
+        expect(schema({ active: "true" })).toEqual({
+          valid: false,
+          errors: [{ field: "active", message: "Activo erroneo" }],
+        });
+      });
+
+      it("allows function custom messages", () => {
+        const schema = v({ active: req(bool((v) => `Activo erroneo: ${v}`)) });
+        expect(schema({ active: "true" })).toEqual({
+          valid: false,
+          errors: [{ field: "active", message: "Activo erroneo: true" }],
         });
       });
     });
@@ -159,6 +212,22 @@ describe("minival", () => {
           errors: undefined,
         });
       });
+
+      it("allows text custom messages", () => {
+        const schema = v({ age: req(min(18, "Edad erronea")) });
+        expect(schema({ age: 17 })).toEqual({
+          valid: false,
+          errors: [{ field: "age", message: "Edad erronea" }],
+        });
+      });
+
+      it("allows function custom messages", () => {
+        const schema = v({ age: req(min(18, (v) => `Edad erronea: ${v}`)) });
+        expect(schema({ age: 17 })).toEqual({
+          valid: false,
+          errors: [{ field: "age", message: "Edad erronea: 17" }],
+        });
+      });
     });
 
     describe("max", () => {
@@ -191,6 +260,22 @@ describe("minival", () => {
           errors: undefined,
         });
       });
+
+      it("allows text custom messages", () => {
+        const schema = v({ age: req(max(18, "Edad erronea")) });
+        expect(schema({ age: 19 })).toEqual({
+          valid: false,
+          errors: [{ field: "age", message: "Edad erronea" }],
+        });
+      });
+
+      it("allows function custom messages", () => {
+        const schema = v({ age: req(max(18, (v) => `Edad erronea: ${v}`)) });
+        expect(schema({ age: 19 })).toEqual({
+          valid: false,
+          errors: [{ field: "age", message: "Edad erronea: 19" }],
+        });
+      });
     });
 
     describe("eq", () => {
@@ -205,6 +290,24 @@ describe("minival", () => {
           valid: true,
           data: { role: "admin" },
           errors: undefined,
+        });
+      });
+
+      it("allows text custom messages", () => {
+        const schema = v({ role: req(eq("admin", "Rol erroneo")) });
+        expect(schema({ role: "user" })).toEqual({
+          valid: false,
+          errors: [{ field: "role", message: "Rol erroneo" }],
+        });
+      });
+
+      it("allows function custom messages", () => {
+        const schema = v({
+          role: req(eq("admin", (v) => `Rol erroneo: ${v}`)),
+        });
+        expect(schema({ role: "user" })).toEqual({
+          valid: false,
+          errors: [{ field: "role", message: "Rol erroneo: user" }],
         });
       });
     });
@@ -223,6 +326,24 @@ describe("minival", () => {
           errors: undefined,
         });
       });
+
+      it("allows text custom messages", () => {
+        const schema = v({ banned: req(ne(true, "Bloqueado erroneo")) });
+        expect(schema({ banned: true })).toEqual({
+          valid: false,
+          errors: [{ field: "banned", message: "Bloqueado erroneo" }],
+        });
+      });
+
+      it("allows function custom messages", () => {
+        const schema = v({
+          banned: req(ne(true, (v) => `Bloqueado erroneo: ${v}`)),
+        });
+        expect(schema({ banned: true })).toEqual({
+          valid: false,
+          errors: [{ field: "banned", message: "Bloqueado erroneo: true" }],
+        });
+      });
     });
 
     describe("rgx", () => {
@@ -239,6 +360,24 @@ describe("minival", () => {
           errors: undefined,
         });
       });
+
+      it("allows text custom messages", () => {
+        const schema = v({ code: req(rgx(/^\d{4}$/, "Código erroneo")) });
+        expect(schema({ code: "abc" })).toEqual({
+          valid: false,
+          errors: [{ field: "code", message: "Código erroneo" }],
+        });
+      });
+
+      it("allows function custom messages", () => {
+        const schema = v({
+          code: req(rgx(/^\d{4}$/, (v) => `Código erroneo: ${v}`)),
+        });
+        expect(schema({ code: "abc" })).toEqual({
+          valid: false,
+          errors: [{ field: "code", message: "Código erroneo: abc" }],
+        });
+      });
     });
 
     describe("email", () => {
@@ -253,6 +392,22 @@ describe("minival", () => {
           valid: true,
           data: { email: "a@b.com" },
           errors: undefined,
+        });
+      });
+
+      it("allows text custom messages", () => {
+        const schema = v({ email: req(email("Email erroneo")) });
+        expect(schema({ email: "invalid" })).toEqual({
+          valid: false,
+          errors: [{ field: "email", message: "Email erroneo" }],
+        });
+      });
+
+      it("allows function custom messages", () => {
+        const schema = v({ email: req(email((v) => `Email erroneo: ${v}`)) });
+        expect(schema({ email: "invalid" })).toEqual({
+          valid: false,
+          errors: [{ field: "email", message: "Email erroneo: invalid" }],
         });
       });
     });
@@ -315,7 +470,7 @@ describe("minival", () => {
   describe("custom rule", () => {
     it("validates custom rule", () => {
       const isEven = () => (val, field) => {
-        if (typeof val !== 'number' || val % 2 !== 0) {
+        if (typeof val !== "number" || val % 2 !== 0) {
           return `${field} must be an even number`;
         }
       };
